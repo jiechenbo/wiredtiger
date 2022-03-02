@@ -1,0 +1,42 @@
+defaults:
+  actions:
+    queue:
+      name: default
+      method: squash
+      update_method: rebase
+      commit_message_template: |
+        {{ title }} (#{{ number }})
+        {{ body | get_section("## Commit Message", "") }}
+queue_rules:
+  - name: default
+    conditions:
+      - check-success=Evergreen
+
+pull_request_rules:
+  - name: automatic merge 
+    conditions:
+      - base=develop
+      - label=ready-to-merge
+      - or:
+        - and:
+            - title~=WT-\d+
+            - "#changes-requested-reviews-by=2"
+        - and:
+            - title~=Revert WT-\d+
+            - "#changes-requested-reviews-by=0"
+      - body~=## Commit Message
+    actions:
+      queue:
+        name: default
+
+  - name: backport merge 
+    conditions:
+      - check-success=Evergreen
+      - label=ready-to-merge
+      - label=backport
+      - title~=WT-\d+.*\(.* backport\)
+      - "#changes-requested-reviews-by=1"
+      - body~=## Commit Message
+    actions:
+      queue:
+        name: default
