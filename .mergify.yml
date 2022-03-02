@@ -10,7 +10,8 @@ defaults:
 queue_rules:
   - name: default
     conditions:
-      - check-success=Evergreen
+      - base=develop
+     
 
 pull_request_rules:
   - name: automatic merge 
